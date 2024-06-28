@@ -1,0 +1,67 @@
+version: '3.4'
+
+services:
+
+  rabbitmq:
+    container_name: rabbitmq
+    ports:
+      - 5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+  students.db:
+    container_name: students-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=c0&d7_elSt5p!d
+    ports:
+       - 1401:1433
+
+  students.api:
+    container_name: students.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - DB_Host=students.db
+      - DB_Name=students_db
+      - DB_Password=c0&d7_elSt5p!d
+      - RabbitMQHost=rabbitmq
+      - RABBITMQUser=admin
+      - RABBITMQPassword=admin
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://students-jaeger:4317
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+    ports:
+      - 5001:8080
+      - 7071:8081
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  students.reporting:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - DB_Host=students.db
+      - DB_Name=students_report_db
+      - DB_Password=c0&d7_elSt5p!d
+      - RabbitMQHost=rabbitmq
+      - RABBITMQUser=admin
+      - RABBITMQPassword=admin
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://students-jaeger:4317
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+    ports:
+      - 5267:8080
+      - 7009:8081
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+ 
+  students-jaeger:
+    container_name: jaeger
+    ports:
+     - 4317:4317
+     - 4318:4318
+     - 16686:16686 

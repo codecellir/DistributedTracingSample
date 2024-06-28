@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management 
+
+  students.db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+
+  students.api:
+    image: ${DOCKER_REGISTRY-}studentsapi
+    build:
+      context: .
+      dockerfile: Student.Api/Dockerfile
+
+  students.reporting:
+    image: ${DOCKER_REGISTRY-}studentsreporting
+    build:
+      context: .
+      dockerfile: Students.Reporting/Dockerfile
+
+  students-jaeger:
+    image: jaegertracing/all-in-one:latest
